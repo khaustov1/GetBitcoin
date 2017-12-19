@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.tapjoy.TJConnectListener;
 import com.tapjoy.TJGetCurrencyBalanceListener;
+import com.tapjoy.TJSpendCurrencyListener;
 import com.tapjoy.Tapjoy;
 
 import java.lang.ref.WeakReference;
@@ -33,6 +34,17 @@ public class TapJoyManager implements TJConnectListener {
             Log.i("Tapjoy", "getCurrencyBalance error: " + error);
         }
     };
+    private final TJSpendCurrencyListener spendCurrencyListener = new TJSpendCurrencyListener() {
+        @Override
+        public void onSpendCurrencyResponse(String currencyName, int balance) {
+            Log.i("Tapjoy", currencyName + ": " + balance);
+        }
+
+        @Override
+        public void onSpendCurrencyResponseFailure(String error) {
+            Log.i("Tapjoy", "spendCurrency error: " + error);
+        }
+    };
 
     public TapJoyManager(MainActivity mainActivity) {
         contextWeakReference = new WeakReference<>(mainActivity);
@@ -43,6 +55,7 @@ public class TapJoyManager implements TJConnectListener {
             Tapjoy.connect(contextWeakReference.get(),
                     contextWeakReference.get().getString(R.string.api_key),
                     new Hashtable(), this);
+            //ToDo: disable before release
             Tapjoy.setDebugEnabled(true);
         } else {
             throw new RuntimeException("Main activity is dead");
@@ -55,6 +68,10 @@ public class TapJoyManager implements TJConnectListener {
         }, GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
     }
 
+    public void spendCurrency(int amount) {
+        Tapjoy.spendCurrency(amount, spendCurrencyListener);
+    }
+
     public void start() {
         if (contextWeakReference.get() != null) {
             Tapjoy.onActivityStart(contextWeakReference.get());
@@ -64,6 +81,7 @@ public class TapJoyManager implements TJConnectListener {
     public void stop() {
         if (contextWeakReference.get() != null) {
             Tapjoy.onActivityStop(contextWeakReference.get());
+            contextWeakReference.clear();
         }
     }
 
