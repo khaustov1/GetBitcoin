@@ -1,4 +1,4 @@
-package com.nullpointer.getbitcoin;
+package com.nullpointer.getbitcoin.model;
 
 import java.math.BigInteger;
 

@@ -2,6 +2,7 @@ package com.nullpointer.getbitcoin;
 
 import android.util.Log;
 
+import com.nullpointer.getbitcoin.ui.MainActivity;
 import com.tapjoy.TJConnectListener;
 import com.tapjoy.TJGetCurrencyBalanceListener;
 import com.tapjoy.TJSpendCurrencyListener;
@@ -21,7 +22,7 @@ public class TapJoyManager implements TJConnectListener {
     private static final int GET_BALANCE_INTERVAL = 30;
     private static final int GET_BALANCE_START_DELAY = 10;
 
-    private final WeakReference<MainActivity> contextWeakReference;
+    private final WeakReference<MainActivity> activityWeakReference;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private final TJGetCurrencyBalanceListener balanceListener = new TJGetCurrencyBalanceListener() {
         @Override
@@ -47,25 +48,18 @@ public class TapJoyManager implements TJConnectListener {
     };
 
     public TapJoyManager(MainActivity mainActivity) {
-        contextWeakReference = new WeakReference<>(mainActivity);
+        activityWeakReference = new WeakReference<>(mainActivity);
     }
 
     public void initialize() {
-        if (contextWeakReference.get() != null) {
-            Tapjoy.connect(contextWeakReference.get(),
-                    contextWeakReference.get().getString(R.string.api_key),
+        if (activityWeakReference.get() != null) {
+            Tapjoy.connect(activityWeakReference.get(),
+                    activityWeakReference.get().getString(R.string.api_key),
                     new Hashtable(), this);
-            //ToDo: disable before release
             Tapjoy.setDebugEnabled(true);
         } else {
             throw new RuntimeException("Main activity is dead");
         }
-        executorService.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                Tapjoy.getCurrencyBalance(balanceListener);
-            }
-        }, GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
     }
 
     public void spendCurrency(int amount) {
@@ -73,21 +67,27 @@ public class TapJoyManager implements TJConnectListener {
     }
 
     public void start() {
-        if (contextWeakReference.get() != null) {
-            Tapjoy.onActivityStart(contextWeakReference.get());
+        if (activityWeakReference.get() != null) {
+            Tapjoy.onActivityStart(activityWeakReference.get());
         }
     }
 
     public void stop() {
-        if (contextWeakReference.get() != null) {
-            Tapjoy.onActivityStop(contextWeakReference.get());
-            contextWeakReference.clear();
+        if (activityWeakReference.get() != null) {
+            Tapjoy.onActivityStop(activityWeakReference.get());
+            activityWeakReference.clear();
         }
     }
 
     @Override
     public void onConnectSuccess() {
         Log.d("Tapjoy", "Connection established successfully");
+        executorService.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                Tapjoy.getCurrencyBalance(balanceListener);
+            }
+        }, GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
