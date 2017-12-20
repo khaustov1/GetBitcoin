@@ -26,8 +26,10 @@ public class TapJoyPlaceManager implements TJPlacementListener, IPlaceManager {
     @Override
     public void showOfferWall() {
         //ToDo: it should be available too
-        if (offerWall.isContentReady()) {
-            offerWall.showContent();
+        if (offerWall != null) {
+            if (offerWall.isContentReady()) {
+                offerWall.showContent();
+            }
         }
     }
 

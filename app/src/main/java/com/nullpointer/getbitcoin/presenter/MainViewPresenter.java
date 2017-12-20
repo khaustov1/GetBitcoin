@@ -20,7 +20,7 @@ public class MainViewPresenter implements IMainViewPresenter {
     private final IBTCBalanceManager btcBalanceManager;
 
     public MainViewPresenter(IMainView mainView) {
-        this.mainViewWeakReference = new WeakReference<IMainView>(mainView);
+        this.mainViewWeakReference = new WeakReference<>(mainView);
         this.tapJoyManager = new TapJoyManager((MainActivity) mainView, this);
         this.btcBalanceManager = new BTCBalanceManager();
     }
