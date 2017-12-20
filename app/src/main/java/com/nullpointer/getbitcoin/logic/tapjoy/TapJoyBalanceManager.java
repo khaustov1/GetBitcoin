@@ -12,7 +12,7 @@ import com.tapjoy.TJSpendCurrencyListener;
 
 public class TapJoyBalanceManager {
     private final IMainViewPresenter mainViewPresenter;
-    private int currentBalance;
+    private volatile int currentBalance;
 
     public TapJoyBalanceManager(IMainViewPresenter mainViewPresenter) {
         this.mainViewPresenter = mainViewPresenter;
@@ -22,8 +22,8 @@ public class TapJoyBalanceManager {
         @Override
         public void onGetCurrencyBalanceResponse(String currencyName, int balance) {
             Log.i("Tapjoy", "getCurrencyBalance returned " + currencyName + ":" + balance);
-            mainViewPresenter.onCurrencyBalanceChanged();
             currentBalance = balance;
+            mainViewPresenter.onCurrencyBalanceChanged();
         }
 
         @Override
