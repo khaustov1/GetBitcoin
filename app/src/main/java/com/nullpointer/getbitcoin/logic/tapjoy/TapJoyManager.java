@@ -80,12 +80,8 @@ public class TapJoyManager implements TJConnectListener, ITapJoyManager {
     public void onConnectSuccess() {
         Log.d("Tapjoy", "Connection established successfully");
         placeManager.initialize();
-        executorService.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                Tapjoy.getCurrencyBalance(balanceManager.getBalanceListener());
-            }
-        }, GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new GetCurrencyBalanceTask(balanceManager.getBalanceListener())
+                , GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
     }
 
     @Override
