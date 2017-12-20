@@ -2,6 +2,7 @@ package com.nullpointer.getbitcoin.logic.tapjoy;
 
 import android.util.Log;
 
+import com.nullpointer.getbitcoin.presenter.interfaces.IMainViewPresenter;
 import com.tapjoy.TJGetCurrencyBalanceListener;
 import com.tapjoy.TJSpendCurrencyListener;
 
@@ -10,12 +11,18 @@ import com.tapjoy.TJSpendCurrencyListener;
  */
 
 public class TapJoyBalanceManager {
+    private final IMainViewPresenter mainViewPresenter;
     private int currentBalance;
+
+    public TapJoyBalanceManager(IMainViewPresenter mainViewPresenter) {
+        this.mainViewPresenter = mainViewPresenter;
+    }
 
     private final TJGetCurrencyBalanceListener balanceListener = new TJGetCurrencyBalanceListener() {
         @Override
         public void onGetCurrencyBalanceResponse(String currencyName, int balance) {
             Log.i("Tapjoy", "getCurrencyBalance returned " + currencyName + ":" + balance);
+            mainViewPresenter.onCurrencyBalanceChanged();
             currentBalance = balance;
         }
 
@@ -42,5 +49,9 @@ public class TapJoyBalanceManager {
 
     public TJSpendCurrencyListener getSpendCurrencyListener() {
         return spendCurrencyListener;
+    }
+
+    public int getCurrentBalance() {
+        return currentBalance;
     }
 }

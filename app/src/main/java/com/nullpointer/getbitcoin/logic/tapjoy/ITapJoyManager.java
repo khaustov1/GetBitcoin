@@ -6,8 +6,14 @@ package com.nullpointer.getbitcoin.logic.tapjoy;
 
 public interface ITapJoyManager {
     void initialize();
+
     void start();
+
     void stop();
+
     void spendCurrency(int amount);
+
     void showOfferWall();
+
+    int getCurrencyBalance();
 }

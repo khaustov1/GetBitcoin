@@ -3,6 +3,7 @@ package com.nullpointer.getbitcoin.logic.tapjoy;
 import android.util.Log;
 
 import com.nullpointer.getbitcoin.R;
+import com.nullpointer.getbitcoin.presenter.interfaces.IMainViewPresenter;
 import com.nullpointer.getbitcoin.ui.MainActivity;
 import com.tapjoy.TJConnectListener;
 import com.tapjoy.Tapjoy;
@@ -23,12 +24,15 @@ public class TapJoyManager implements TJConnectListener, ITapJoyManager {
 
     private final WeakReference<MainActivity> activityWeakReference;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private final TapJoyBalanceManager balanceManager = new TapJoyBalanceManager();
+    private final TapJoyBalanceManager balanceManager;
     private final TapJoyPlaceManager placeManager;
+    private final IMainViewPresenter mainViewPresenter;
 
-    public TapJoyManager(MainActivity mainActivity) {
-        activityWeakReference = new WeakReference<>(mainActivity);
-        placeManager = new TapJoyPlaceManager();
+    public TapJoyManager(MainActivity mainActivity, IMainViewPresenter mainViewPresenter) {
+        this.activityWeakReference = new WeakReference<>(mainActivity);
+        this.placeManager = new TapJoyPlaceManager();
+        this.balanceManager = new TapJoyBalanceManager(mainViewPresenter);
+        this.mainViewPresenter = mainViewPresenter;
     }
 
     @Override
@@ -65,6 +69,11 @@ public class TapJoyManager implements TJConnectListener, ITapJoyManager {
     @Override
     public void showOfferWall() {
         placeManager.showOfferWall();
+    }
+
+    @Override
+    public int getCurrencyBalance() {
+        return balanceManager.getCurrentBalance();
     }
 
     @Override

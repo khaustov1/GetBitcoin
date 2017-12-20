@@ -6,7 +6,17 @@ package com.nullpointer.getbitcoin.presenter.interfaces;
 
 public interface IMainViewPresenter {
     void beforeViewCreated();
+
     void onViewCreated();
+
     void onViewDestroyed();
+
     void showOfferWall();
+
+    void onCurrencyBalanceChanged();
+
+    int getCurrencyBalance();
+
+    String getBTCBalance();
+
 }
