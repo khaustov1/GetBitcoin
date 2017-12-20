@@ -1,11 +1,10 @@
-package com.nullpointer.getbitcoin;
+package com.nullpointer.getbitcoin.logic.tapjoy;
 
 import android.util.Log;
 
+import com.nullpointer.getbitcoin.R;
 import com.nullpointer.getbitcoin.ui.MainActivity;
 import com.tapjoy.TJConnectListener;
-import com.tapjoy.TJGetCurrencyBalanceListener;
-import com.tapjoy.TJSpendCurrencyListener;
 import com.tapjoy.Tapjoy;
 
 import java.lang.ref.WeakReference;
@@ -18,39 +17,21 @@ import java.util.concurrent.TimeUnit;
  * Created by Khaustov on 19.12.17.
  */
 
-public class TapJoyManager implements TJConnectListener {
-    private static final int GET_BALANCE_INTERVAL = 30;
-    private static final int GET_BALANCE_START_DELAY = 10;
+public class TapJoyManager implements TJConnectListener, ITapJoyManager {
+    private static final int GET_BALANCE_INTERVAL = 60;
+    private static final int GET_BALANCE_START_DELAY = 0;
 
     private final WeakReference<MainActivity> activityWeakReference;
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private final TJGetCurrencyBalanceListener balanceListener = new TJGetCurrencyBalanceListener() {
-        @Override
-        public void onGetCurrencyBalanceResponse(String currencyName, int balance) {
-            Log.i("Tapjoy", "getCurrencyBalance returned " + currencyName + ":" + balance);
-        }
-
-        @Override
-        public void onGetCurrencyBalanceResponseFailure(String error) {
-            Log.i("Tapjoy", "getCurrencyBalance error: " + error);
-        }
-    };
-    private final TJSpendCurrencyListener spendCurrencyListener = new TJSpendCurrencyListener() {
-        @Override
-        public void onSpendCurrencyResponse(String currencyName, int balance) {
-            Log.i("Tapjoy", currencyName + ": " + balance);
-        }
-
-        @Override
-        public void onSpendCurrencyResponseFailure(String error) {
-            Log.i("Tapjoy", "spendCurrency error: " + error);
-        }
-    };
+    private final TapJoyBalanceManager balanceManager = new TapJoyBalanceManager();
+    private final TapJoyPlaceManager placeManager;
 
     public TapJoyManager(MainActivity mainActivity) {
         activityWeakReference = new WeakReference<>(mainActivity);
+        placeManager = new TapJoyPlaceManager();
     }
 
+    @Override
     public void initialize() {
         if (activityWeakReference.get() != null) {
             Tapjoy.connect(activityWeakReference.get(),
@@ -62,30 +43,38 @@ public class TapJoyManager implements TJConnectListener {
         }
     }
 
+    @Override
     public void spendCurrency(int amount) {
-        Tapjoy.spendCurrency(amount, spendCurrencyListener);
+        Tapjoy.spendCurrency(amount, balanceManager.getSpendCurrencyListener());
     }
 
+    @Override
     public void start() {
         if (activityWeakReference.get() != null) {
             Tapjoy.onActivityStart(activityWeakReference.get());
         }
     }
 
+    @Override
     public void stop() {
         if (activityWeakReference.get() != null) {
             Tapjoy.onActivityStop(activityWeakReference.get());
-            activityWeakReference.clear();
         }
+    }
+
+    @Override
+    public void showOfferWall() {
+        placeManager.showOfferWall();
     }
 
     @Override
     public void onConnectSuccess() {
         Log.d("Tapjoy", "Connection established successfully");
+        placeManager.initialize();
         executorService.scheduleWithFixedDelay(new Runnable() {
             @Override
             public void run() {
-                Tapjoy.getCurrencyBalance(balanceListener);
+                Tapjoy.getCurrencyBalance(balanceManager.getBalanceListener());
             }
         }, GET_BALANCE_START_DELAY, GET_BALANCE_INTERVAL, TimeUnit.SECONDS);
     }

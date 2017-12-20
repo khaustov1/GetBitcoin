@@ -8,4 +8,5 @@ public interface IMainViewPresenter {
     void beforeViewCreated();
     void onViewCreated();
     void onViewDestroyed();
+    void showOfferWall();
 }

@@ -5,5 +5,5 @@ package com.nullpointer.getbitcoin.ui.interfaces;
  */
 
 public interface IMainView {
-
+    void onShowOfferWallAction();
 }
